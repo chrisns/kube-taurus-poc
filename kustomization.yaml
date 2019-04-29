@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+resources:
+  - job.yaml
+
+configMapGenerator:
+  - name: blazemeter
+    files:
+      - 90-artifacts-dir.json
+      - 90-no-console.json
+      - 99-zinstallID.json

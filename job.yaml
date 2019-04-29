@@ -1,0 +1,43 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: taurus
+spec:
+  template:
+    spec:
+      securityContext:
+        fsGroup: 472
+      restartPolicy: OnFailure
+      containers:
+        - name: taurus
+          image: blazemeter/taurus:latest
+          command:
+            - sh
+            - "-c"
+            - "bzt -o settings.default-executor=jmeter -o execution.scenario.requests.0=http://localhost/ \
+        -o execution.iterations=1 -o execution.hold-for=1 -o execution.throughput=1 && bzt -l bzt.log /bzt-config/*.yml"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 472
+          env:
+            - name: HOME
+              value: /bzt
+          volumeMounts:
+            - mountPath: /etc/bzt.d
+              name: config
+              readOnly: true
+            - mountPath: /bzt-configs
+              name: bzt-configs
+            - mountPath: /bzt
+              name: bzt
+
+      volumes:
+        - name: config
+          configMap:
+            name: blazemeter
+        - name: bzt-configs
+          emptyDir: {}
+        - name: bzt
+          emptyDir: {}
